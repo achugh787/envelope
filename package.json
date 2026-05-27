@@ -1,0 +1,80 @@
+{
+  "name": "@akshit/envelope",
+  "version": "0.1.0",
+  "description": "Wrap your API requests and responses in encrypted envelopes. Deters casual inspection and scraping. NOT end-to-end security against the end user.",
+  "keywords": [
+    "api",
+    "encryption",
+    "anti-scraping",
+    "obfuscation",
+    "fetch",
+    "express",
+    "middleware",
+    "ecdh",
+    "aes-gcm"
+  ],
+  "author": "Akshit",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./client": {
+      "types": "./dist/client/index.d.ts",
+      "import": "./dist/client/index.js",
+      "require": "./dist/client/index.cjs"
+    },
+    "./server": {
+      "types": "./dist/server/index.d.ts",
+      "import": "./dist/server/index.js",
+      "require": "./dist/server/index.cjs"
+    },
+    "./server/express": {
+      "types": "./dist/server/adapters/express.d.ts",
+      "import": "./dist/server/adapters/express.js",
+      "require": "./dist/server/adapters/express.cjs"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "lint": "tsc --noEmit",
+    "prepublishOnly": "npm run build && npm test"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "peerDependencies": {
+    "express": "^4.0.0 || ^5.0.0"
+  },
+  "peerDependenciesMeta": {
+    "express": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.11.0",
+    "express": "^4.18.2",
+    "tsup": "^8.0.0",
+    "typescript": "^5.3.0",
+    "vitest": "^1.2.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

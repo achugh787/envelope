@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Envelope client example</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 720px; margin: 40px auto; padding: 0 20px; }
+    h1 { margin-bottom: 4px; }
+    p.subtitle { color: #666; margin-top: 0; }
+    button { padding: 8px 16px; margin-right: 8px; cursor: pointer; }
+    pre { background: #f4f4f4; padding: 12px; border-radius: 6px; overflow-x: auto; }
+    .hint { color: #888; font-size: 14px; }
+  </style>
+</head>
+<body>
+  <h1>Envelope demo</h1>
+  <p class="subtitle">Open DevTools → Network tab → click a button → look at the response. It's an opaque envelope, not the JSON your app code sees.</p>
+
+  <button id="get-users">GET /users</button>
+  <button id="create-user">POST /users</button>
+
+  <h3>App-level result (decrypted)</h3>
+  <pre id="output">Click a button.</pre>
+
+  <p class="hint">
+    In DevTools the network response looks like:<br>
+    <code>{"v":1,"sid":"...","n":"...","ct":"long-base64-blob","sig":"..."}</code><br>
+    But the <code>console.log</code> below sees the plaintext JSON.
+  </p>
+
+  <script type="module">
+    // In a real app:  import { createTransport } from '@akshit/envelope/client';
+    // For this static demo, we'd bundle. The example assumes you've run:
+    //   npm install && npm run build
+    // and are serving with a bundler. As a quick alternative, you can use a CDN
+    // version once published:
+    //   import { createTransport } from 'https://esm.sh/@akshit/envelope/client';
+    import { createTransport } from 'https://esm.sh/@akshit/envelope@0.1.0/client';
+
+    const api = createTransport({
+      baseURL: 'http://localhost:3000',
+      debug: true,
+    });
+
+    const output = document.getElementById('output');
+
+    document.getElementById('get-users').addEventListener('click', async () => {
+      output.textContent = 'Loading...';
+      try {
+        const data = await api.get('/users');
+        output.textContent = JSON.stringify(data, null, 2);
+      } catch (err) {
+        output.textContent = 'Error: ' + err.message;
+      }
+    });
+
+    document.getElementById('create-user').addEventListener('click', async () => {
+      output.textContent = 'Loading...';
+      try {
+        const data = await api.post('/users', { name: 'Charlie', email: 'charlie@example.com' });
+        output.textContent = JSON.stringify(data, null, 2);
+      } catch (err) {
+        output.textContent = 'Error: ' + err.message;
+      }
+    });
+  </script>
+</body>
+</html>
