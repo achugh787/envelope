@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Primary SEO -->
+  <title>envelop-letterbox — Encrypt API Responses in the Browser Network Tab</title>
+  <meta name="description" content="envelop-letterbox is a lightweight npm library that wraps your Express API responses in AES-GCM encrypted, HMAC-signed envelopes. Keep plaintext JSON out of browser DevTools, deter scrapers, and prevent MITM tampering — with zero changes to your route handlers." />
+  <meta name="keywords" content="encrypt API response, hide JSON network tab, prevent API scraping, AES-GCM express middleware, HMAC signed response, ECDH key exchange npm, obfuscate REST API, browser devtools encryption, envelop-letterbox, API security middleware, node.js encrypt response" />
+  <meta name="author" content="envelop-letterbox" />
+  <link rel="canonical" href="https://envelop-letterbox.dev/" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="envelop-letterbox — Encrypted API Envelopes for Express" />
+  <meta property="og:description" content="Replace plaintext JSON in your Network tab with opaque encrypted blobs. ECDH handshake, AES-GCM encryption, HMAC tamper-protection. Drop-in Express middleware + browser client." />
+  <meta property="og:url" content="https://envelop-letterbox.dev/" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="envelop-letterbox" />
+  <meta name="twitter:description" content="Encrypt your API responses end-to-end. Plaintext JSON stays out of the browser network tab." />
+
+  <!-- Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "envelop-letterbox",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "Node.js, Browser",
+    "description": "npm library that wraps Express API responses in AES-GCM encrypted, HMAC-signed envelopes to prevent network tab inspection and deter API scraping.",
+    "url": "https://envelop-letterbox.dev/",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+    "codeRepository": "https://github.com/your-org/envelop-letterbox",
+    "license": "https://opensource.org/licenses/MIT",
+    "programmingLanguage": ["JavaScript", "TypeScript"]
+  }
+  </script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;1,9..144,300&display=swap');
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --white: #fafaf8;
+      --off: #f3f2ee;
+      --border: #e4e2db;
+      --muted: #9c9890;
+      --text: #1a1917;
+      --accent: #1a1917;
+      --green: #1e6b3c;
+      --red: #8b1f1f;
+      --code-bg: #f0efe9;
+      --mono: 'DM Mono', monospace;
+      --serif: 'Fraunces', Georgia, serif;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--mono);
+      background: var(--white);
+      color: var(--text);
+      font-size: 14px;
+      line-height: 1.7;
+    }
+
+    /* ── Layout ── */
+    .container { max-width: 780px; margin: 0 auto; padding: 0 24px; }
+
+    /* ── Top bar ── */
+    .topbar {
+      border-bottom: 1px solid var(--border);
+      padding: 14px 0;
+      position: sticky;
+      top: 0;
+      background: var(--white);
+      z-index: 100;
+    }
+    .topbar .container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .logo {
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      text-decoration: none;
+      color: var(--text);
+    }
+    .logo span { color: var(--muted); }
+    .topbar-links {
+      display: flex;
+      gap: 24px;
+      list-style: none;
+    }
+    .topbar-links a {
+      text-decoration: none;
+      color: var(--muted);
+      font-size: 12px;
+      transition: color 0.15s;
+    }
+    .topbar-links a:hover { color: var(--text); }
+
+    /* ── Hero ── */
+    .hero {
+      padding: 72px 0 56px;
+      border-bottom: 1px solid var(--border);
+    }
+    .hero h1 {
+      font-family: var(--serif);
+      font-weight: 600;
+      font-size: clamp(30px, 5vw, 44px);
+      line-height: 1.15;
+      letter-spacing: -0.02em;
+      margin-bottom: 16px;
+    }
+    .hero p.lead {
+      color: #4a4845;
+      font-size: 14.5px;
+      max-width: 600px;
+      line-height: 1.75;
+      margin-bottom: 28px;
+    }
+    .install-block {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      padding: 10px 16px;
+      border-radius: 4px;
+      font-size: 13px;
+    }
+    .install-block code { color: var(--text); }
+    .copy-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 11px;
+      padding: 2px 6px;
+      border-left: 1px solid var(--border);
+      transition: color 0.15s;
+    }
+    .copy-btn:hover { color: var(--text); }
+
+    .badges {
+      display: flex;
+      gap: 8px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+    .badge {
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 3px;
+      border: 1px solid var(--border);
+      color: var(--muted);
+    }
+
+    /* ── Warning box ── */
+    .callout {
+      border-left: 3px solid var(--border);
+      padding: 14px 18px;
+      background: var(--off);
+      border-radius: 0 4px 4px 0;
+      font-size: 13px;
+      color: #4a4845;
+      line-height: 1.65;
+    }
+    .callout strong { color: var(--text); }
+    .callout.warn { border-left-color: #c09a3a; }
+
+    /* ── Sections ── */
+    section { padding: 56px 0; border-bottom: 1px solid var(--border); }
+    section:last-of-type { border-bottom: none; }
+
+    h2 {
+      font-family: var(--serif);
+      font-weight: 600;
+      font-size: 22px;
+      letter-spacing: -0.01em;
+      margin-bottom: 6px;
+    }
+    .section-label {
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+    h3 {
+      font-size: 13px;
+      font-weight: 500;
+      margin: 28px 0 10px;
+      letter-spacing: 0.01em;
+    }
+    p { color: #3f3d3a; margin-bottom: 14px; font-size: 13.5px; }
+
+    /* ── Before / After ── */
+    .ba-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin: 24px 0;
+    }
+    @media (max-width: 600px) { .ba-grid { grid-template-columns: 1fr; } }
+
+    .ba-card {
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      overflow: hidden;
+    }
+    .ba-card-header {
+      padding: 8px 14px;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+    .ba-card-header.before { background: #fdf2f2; color: var(--red); }
+    .ba-card-header.after  { background: #f2f8f4; color: var(--green); }
+    .dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+    .dot.red   { background: var(--red); }
+    .dot.green { background: var(--green); }
+    .ba-card pre {
+      padding: 14px;
+      font-size: 12px;
+      line-height: 1.65;
+      background: var(--white);
+      overflow-x: auto;
+    }
+
+    /* ── Code blocks ── */
+    .code-block {
+      position: relative;
+      margin: 20px 0;
+    }
+    .code-label {
+      font-size: 11px;
+      color: var(--muted);
+      padding: 7px 14px;
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-bottom: none;
+      border-radius: 4px 4px 0 0;
+      letter-spacing: 0.04em;
+    }
+    pre.code {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 0 4px 4px 4px;
+      padding: 18px;
+      font-size: 12.5px;
+      line-height: 1.7;
+      overflow-x: auto;
+      color: var(--text);
+    }
+    pre.code .cm  { color: var(--muted); }   /* comment */
+    pre.code .kw  { color: #7d4e1f; }        /* keyword */
+    pre.code .fn  { color: #1e4e6b; }        /* function */
+    pre.code .st  { color: var(--green); }   /* string */
+    pre.code .op  { color: var(--muted); }   /* operator */
+
+    /* ── Options table ── */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12.5px;
+      margin: 20px 0;
+    }
+    thead tr { border-bottom: 2px solid var(--border); }
+    th {
+      text-align: left;
+      padding: 8px 12px;
+      font-size: 11px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 500;
+    }
+    td {
+      padding: 9px 12px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+      color: #3a3835;
+    }
+    td code, th code {
+      background: var(--code-bg);
+      padding: 1px 5px;
+      border-radius: 3px;
+      font-size: 11.5px;
+    }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: var(--off); }
+
+    /* ── Threat model ── */
+    .threat-row { display: flex; gap: 0; border-bottom: 1px solid var(--border); }
+    .threat-row:first-child { border-top: 1px solid var(--border); }
+    .threat-cell { padding: 9px 14px; font-size: 12.5px; }
+    .threat-cell:first-child { flex: 1; color: #3a3835; }
+    .threat-cell:nth-child(2) { width: 90px; font-weight: 500; text-align: center; }
+    .threat-cell:last-child { flex: 1; color: var(--muted); font-size: 12px; }
+    .yes  { color: var(--green); }
+    .no   { color: var(--red); }
+    .part { color: #9a7020; }
+    .threat-header { background: var(--off); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+
+    /* ── FAQ ── */
+    .faq-item { padding: 18px 0; border-bottom: 1px solid var(--border); }
+    .faq-item:last-child { border-bottom: none; }
+    .faq-q { font-weight: 500; color: var(--text); margin-bottom: 6px; font-size: 13.5px; }
+    .faq-a { color: #4a4845; font-size: 13px; }
+
+    /* ── Footer ── */
+    footer {
+      padding: 32px 0;
+      border-top: 1px solid var(--border);
+      font-size: 12px;
+      color: var(--muted);
+    }
+    footer .container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    footer a { color: var(--muted); text-decoration: none; }
+    footer a:hover { color: var(--text); }
+
+    /* ── Inline code ── */
+    code { font-family: var(--mono); font-size: 12.5px; background: var(--code-bg); padding: 1px 5px; border-radius: 3px; }
+
+    /* ── How it works steps ── */
+    .steps { counter-reset: step; }
+    .step {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 22px;
+    }
+    .step-num {
+      counter-increment: step;
+      width: 28px;
+      height: 28px;
+      border: 1px solid var(--border);
+      border-radius: 50%;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--muted);
+      margin-top: 1px;
+    }
+    .step-num::before { content: counter(step); }
+    .step-body { flex: 1; }
+    .step-body strong { color: var(--text); display: block; margin-bottom: 4px; font-size: 13px; }
+    .step-body p { font-size: 13px; margin-bottom: 0; }
+
+    /* scroll margin for anchors */
+    [id] { scroll-margin-top: 64px; }
+  </style>
+</head>
+<body>
+
+<!-- ── Top nav ── -->
+<nav class="topbar" aria-label="Primary navigation">
+  <div class="container">
+    <a href="#" class="logo">envelop<span>-letterbox</span></a>
+    <ul class="topbar-links">
+      <li><a href="#why">Why</a></li>
+      <li><a href="#quickstart">Quickstart</a></li>
+      <li><a href="#api">API</a></li>
+      <li><a href="#threat-model">Threats</a></li>
+      <li><a href="https://github.com/your-org/envelop-letterbox" rel="noopener">GitHub ↗</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- ── Hero ── -->
+<header class="hero" id="hero">
+  <div class="container">
+    <p class="section-label">npm package · MIT license</p>
+    <h1>Your API responses<br/>should not be readable<br/>in the network tab.</h1>
+    <p class="lead">
+      <strong>envelop-letterbox</strong> wraps every API response in an AES-GCM encrypted, HMAC-signed envelope.
+      Plaintext JSON disappears from browser DevTools. Curl-based scrapers stop working. MITM tampering gets caught.
+      Your route handlers stay exactly as they are.
+    </p>
+    <div class="install-block">
+      <code id="install-cmd">npm install envelop-letterbox</code>
+      <button class="copy-btn" onclick="copyInstall()" aria-label="Copy install command">copy</button>
+    </div>
+    <div class="badges">
+      <span class="badge">Node 18+</span>
+      <span class="badge">Express</span>
+      <span class="badge">WebCrypto</span>
+      <span class="badge">AES-GCM</span>
+      <span class="badge">HMAC-SHA256</span>
+      <span class="badge">ECDH P-256</span>
+      <span class="badge">Zero-config</span>
+    </div>
+  </div>
+</header>
+
+<main>
+
+<!-- ── Why ── -->
+<section id="why">
+  <div class="container">
+    <p class="section-label">The problem</p>
+    <h2>Open DevTools. See your data. So does everyone else.</h2>
+    <p>
+      Every API response you ship lands in the browser's Network tab as readable JSON.
+      Your field names, data shapes, IDs, pricing, and business logic are one F12 away from
+      any user, support rep, corporate proxy, or scraper with a curl command.
+    </p>
+    <p>
+      HTTPS protects data <em>in transit</em>. It does nothing once the browser receives it.
+      That's the gap this library fills.
+    </p>
+
+    <div class="ba-grid" aria-label="Before and after comparison">
+      <div class="ba-card">
+        <div class="ba-card-header before"><span class="dot red"></span>Without envelop-letterbox</div>
+        <pre><code>// Browser Network tab → Response
+
+{
+  "users": [
+    { "id": 1,
+      "name": "Alice",
+      "plan": "enterprise",
+      "mrr": 4200 },
+    { "id": 2,
+      "name": "Bob",
+      "plan": "free" }
+  ],
+  "total": 2
+}</code></pre>
+      </div>
+      <div class="ba-card">
+        <div class="ba-card-header after"><span class="dot green"></span>With envelop-letterbox</div>
+        <pre><code>// Browser Network tab → Response
+
+{
+  "v": 1,
+  "sid": "a3f8c2...",
+  "n": "7d4e1a...",
+  "ct": "U2FsdGVkX1+mK8...",
+  "sig": "c3ab8f..."
+}
+
+// Your app code still gets:
+// { users: [...], total: 2 }</code></pre>
+      </div>
+    </div>
+
+    <div class="callout warn">
+      <strong>Honest disclaimer:</strong> This is not cryptographic security against the end user.
+      Someone who opens DevTools and sets a breakpoint inside the library can still read decrypted data —
+      that's an unsolvable property of running JavaScript in a browser.
+      What this <em>does</em> do: raise the scraping cost from "5 seconds with curl" to "you need to execute my JS",
+      deter casual inspection, and prevent MITM response tampering.
+      If data must be hidden from the user entirely, keep it server-side.
+    </div>
+  </div>
+</section>
+
+<!-- ── How it works ── -->
+<section id="how-it-works">
+  <div class="container">
+    <p class="section-label">Internals</p>
+    <h2>How it works</h2>
+    <p>The whole flow runs automatically. You do not touch any of it.</p>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num"></div>
+        <div class="step-body">
+          <strong>ECDH Handshake (first request)</strong>
+          <p>Client and server each generate ephemeral P-256 keypairs and exchange public keys.
+          Both sides derive the same AES-GCM encryption key and HMAC signing key via HKDF.
+          The raw key is never sent over the wire.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num"></div>
+        <div class="step-body">
+          <strong>Encrypted + signed envelope</strong>
+          <p>Every subsequent response body is encrypted with AES-GCM and HMAC-signed (separate key, same HKDF).
+          The wire format is a compact JSON object: <code>{ v, sid, n, ct, sig }</code>.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num"></div>
+        <div class="step-body">
+          <strong>Transparent decryption on the client</strong>
+          <p>The <code>createTransport</code> client decrypts and verifies every response before returning it.
+          Your UI code calls <code>api.get('/users')</code> and gets plain JS objects. No glue code needed.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num"></div>
+        <div class="step-body">
+          <strong>Session expiry + auto re-handshake</strong>
+          <p>Sessions expire after 1 hour by default. On expiry (or server restart), the client
+          re-handshakes automatically and retries the request once. Fully transparent.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Quickstart ── -->
+<section id="quickstart">
+  <div class="container">
+    <p class="section-label">Getting started</p>
+    <h2>Quickstart</h2>
+    <p>Two steps. Add the middleware on the server. Use the transport on the client. Done.</p>
+
+    <h3>1 — Server (Express)</h3>
+    <div class="code-block">
+      <div class="code-label">server.js</div>
+      <pre class="code"><span class="kw">import</span> express <span class="kw">from</span> <span class="st">'express'</span>;
+<span class="kw">import</span> { createGuard } <span class="kw">from</span> <span class="st">'envelop-letterbox/server/express'</span>;
+
+<span class="kw">const</span> app = <span class="fn">express</span>();
+app.<span class="fn">use</span>(express.<span class="fn">json</span>());
+app.<span class="fn">use</span>(<span class="fn">createGuard</span>());  <span class="cm">// ← one line, zero config</span>
+
+app.<span class="fn">get</span>(<span class="st">'/users'</span>, (req, res) =&gt; {
+  res.<span class="fn">json</span>({ users: [<span class="cm">/* ... */</span>] });  <span class="cm">// ← unchanged, auto-encrypted</span>
+});
+
+app.<span class="fn">listen</span>(<span class="st">3000</span>);</pre>
+    </div>
+
+    <h3>2 — Client (browser or Node)</h3>
+    <div class="code-block">
+      <div class="code-label">client.js</div>
+      <pre class="code"><span class="kw">import</span> { createTransport } <span class="kw">from</span> <span class="st">'envelop-letterbox/client'</span>;
+
+<span class="kw">const</span> api = <span class="fn">createTransport</span>({ baseURL: <span class="st">'http://localhost:3000'</span> });
+
+<span class="kw">const</span> data = <span class="kw">await</span> api.<span class="fn">get</span>(<span class="st">'/users'</span>);
+<span class="cm">// data === { users: [...] }  ← decrypted, verified, ready to use</span>
+
+<span class="cm">// All methods available:</span>
+<span class="kw">await</span> api.<span class="fn">post</span>(<span class="st">'/users'</span>, { name: <span class="st">'Charlie'</span> });
+<span class="kw">await</span> api.<span class="fn">put</span>(<span class="st">'/users/1'</span>, { plan: <span class="st">'pro'</span> });
+<span class="kw">await</span> api.<span class="fn">delete</span>(<span class="st">'/users/1'</span>);</pre>
+    </div>
+
+    <p>That is the entire integration. Route handlers don't change. UI data-fetching doesn't change.</p>
+
+    <h3>Skipping specific routes</h3>
+    <div class="code-block">
+      <div class="code-label">server.js — skip health checks and public routes</div>
+      <pre class="code">app.<span class="fn">use</span>(<span class="fn">createGuard</span>({
+  skipPaths: [<span class="st">'/health'</span>, <span class="st">'/public'</span>, <span class="st">/^\/assets\//</span>]
+}));</pre>
+    </div>
+
+    <h3>Custom session store (Redis, multi-instance)</h3>
+    <div class="code-block">
+      <div class="code-label">server.js — plug in Redis for clustered deployments</div>
+      <pre class="code"><span class="kw">class</span> RedisSessionStore {
+  <span class="kw">async</span> <span class="fn">get</span>(sid)      { <span class="cm">/* fetch + deserialize from Redis */</span> }
+  <span class="kw">async</span> <span class="fn">set</span>(session)  { <span class="cm">/* serialize + store with TTL    */</span> }
+  <span class="kw">async</span> <span class="fn">delete</span>(sid)   { <span class="cm">/* DEL                           */</span> }
+}
+
+app.<span class="fn">use</span>(<span class="fn">createGuard</span>({ sessionStore: <span class="kw">new</span> <span class="fn">RedisSessionStore</span>() }));</pre>
+    </div>
+    <p style="margin-top:-6px; font-size:12.5px; color:var(--muted);">
+      Note: <code>CryptoKey</code> is not JSON-serializable. Store raw key bytes and re-import on read.
+      A reference Redis implementation ships in a future release.
+    </p>
+  </div>
+</section>
+
+<!-- ── API Reference ── -->
+<section id="api">
+  <div class="container">
+    <p class="section-label">Reference</p>
+    <h2>API</h2>
+
+    <h3><code>createTransport(options)</code> — client</h3>
+    <p>Creates an HTTP client that transparently handles handshakes, encryption, and decryption.</p>
+    <table>
+      <thead>
+        <tr>
+          <th>Option</th>
+          <th>Default</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>baseURL</code></td>
+          <td><em>required</em></td>
+          <td>Base URL of the server.</td>
+        </tr>
+        <tr>
+          <td><code>handshakeEndpoint</code></td>
+          <td><code>/__envelope/handshake</code></td>
+          <td>Path the server listens on for key exchange.</td>
+        </tr>
+        <tr>
+          <td><code>fetchOptions</code></td>
+          <td><code>{}</code></td>
+          <td>Extra options applied to every fetch call (credentials, headers, etc.).</td>
+        </tr>
+        <tr>
+          <td><code>debug</code></td>
+          <td><code>false</code></td>
+          <td>Log handshake and request events to the console.</td>
+        </tr>
+        <tr>
+          <td><code>fetch</code></td>
+          <td>global <code>fetch</code></td>
+          <td>Supply a custom fetch implementation (e.g. node-fetch, undici).</td>
+        </tr>
+      </tbody>
+    </table>
+    <p><strong>Returns:</strong> <code>{ get, post, put, patch, delete, request, rotateSession }</code></p>
+
+    <h3><code>createGuard(options)</code> — Express middleware</h3>
+    <p>Drop-in Express middleware. Handles the handshake endpoint and encrypts all non-skipped responses.</p>
+    <table>
+      <thead>
+        <tr>
+          <th>Option</th>
+          <th>Default</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>handshakeEndpoint</code></td>
+          <td><code>/__envelope/handshake</code></td>
+          <td>Path that handles the ECDH key exchange.</td>
+        </tr>
+        <tr>
+          <td><code>sessionTtlMs</code></td>
+          <td><code>3600000</code> (1h)</td>
+          <td>How long a derived session key lives before expiry.</td>
+        </tr>
+        <tr>
+          <td><code>sessionStore</code></td>
+          <td>in-memory <code>Map</code></td>
+          <td>Implement the <code>SessionStore</code> interface for Redis or any external store.</td>
+        </tr>
+        <tr>
+          <td><code>skipPaths</code></td>
+          <td><code>[]</code></td>
+          <td>Strings or <code>RegExp</code>s for paths to bypass (e.g. <code>/health</code>, public assets).</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ── Threat model ── -->
+<section id="threat-model">
+  <div class="container">
+    <p class="section-label">Security posture</p>
+    <h2>Threat model</h2>
+    <p>Know exactly what this library defends against and what it doesn't. No surprises.</p>
+
+    <div style="margin-top:20px;">
+      <div class="threat-row threat-header">
+        <div class="threat-cell">Attacker / scenario</div>
+        <div class="threat-cell">Defended?</div>
+        <div class="threat-cell">Notes</div>
+      </div>
+      <div class="threat-row">
+        <div class="threat-cell">Casual user inspecting Network tab</div>
+        <div class="threat-cell yes">✓ Yes</div>
+        <div class="threat-cell">Sees only the opaque envelope</div>
+      </div>
+      <div class="threat-row">
+        <div class="threat-cell">Scraper using curl / requests</div>
+        <div class="threat-cell yes">✓ Yes</div>
+        <div class="threat-cell">ECDH required before any response is readable</div>
+      </div>
+      <div class="threat-row">
+        <div class="threat-cell">MITM modifying responses in transit</div>
+        <div class="threat-cell yes">✓ Yes</div>
+        <div class="threat-cell">HMAC-SHA256 signature is verified client-side</div>
+      </div>
+      <div class="threat-row">
+        <div class="threat-cell">MITM observing responses in transit</div>
+        <div class="threat-cell yes">✓ Yes</div>
+        <div class="threat-cell">Covered by HTTPS + envelope; HTTPS alone suffices here</div>
+      </div>
+      <div class="threat-row">
+        <div class="threat-cell">Scraper running headless browser</div>
+        <div class="threat-cell part">⚠ Partial</div>
+        <div class="threat-cell">Must execute your JS; cost raised significantly</div>
+      </div>
+      <div class="threat-row">
+        <div class="threat-cell">Determined user setting DevTools breakpoints</div>
+        <div class="threat-cell no">✗ No</div>
+        <div class="threat-cell">Can read plaintext from variables in scope</div>
+      </div>
+      <div class="threat-row">
+        <div class="threat-cell">Browser extension reading window state</div>
+        <div class="threat-cell no">✗ No</div>
+        <div class="threat-cell">Extensions can read everything</div>
+      </div>
+      <div class="threat-row">
+        <div class="threat-cell">Compromised CDN serving modified JS</div>
+        <div class="threat-cell no">✗ No</div>
+        <div class="threat-cell">Use SRI hashes on your script tags</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FAQ ── -->
+<section id="faq">
+  <div class="container">
+    <p class="section-label">FAQ</p>
+    <h2>Frequently asked questions</h2>
+
+    <div class="faq-item">
+      <div class="faq-q">Is this actually secure?</div>
+      <div class="faq-a">It's designed to be <em>opaque</em>, not secure against the user. Read the threat model above.
+      If you need real protection from the end user, keep that data server-side. This is not a substitute for proper authorization.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">Why not just minify or obfuscate JavaScript?</div>
+      <div class="faq-a">Obfuscation hides your code. This hides the <em>data shape and values</em> flowing over the wire.
+      Even with fully readable JS, a scraper now has to run your whole client instead of hitting an endpoint with curl.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">Does it work in Node-to-Node (server-to-server)?</div>
+      <div class="faq-a">Yes. The transport works in any environment with the WebCrypto API — Node 18+, Bun, Deno, browsers, and Edge Workers.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">Does it work with streaming responses (SSE, chunked transfer)?</div>
+      <div class="faq-a">Not in v0.1. Streaming requires a different protocol design. Use plain HTTPS for those endpoints and add them to <code>skipPaths</code>.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">What about file uploads (multipart)?</div>
+      <div class="faq-a">Multipart request bodies are not envelope-wrapped in v0.1. Other fields pass through normally.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">Can I encrypt only some routes?</div>
+      <div class="faq-a">Yes. Use <code>skipPaths</code> in <code>createGuard</code> to exclude paths from encryption.
+      The client sends a session header on every request; non-guarded routes ignore it silently.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">How do I debug what the encrypted envelope actually looks like?</div>
+      <div class="faq-a">Pass <code>debug: true</code> to <code>createTransport</code> for client-side logs.
+      On the server, log inside your own route handler — the plaintext is available there as normal.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Roadmap ── -->
+<section id="roadmap">
+  <div class="container">
+    <p class="section-label">What's next</p>
+    <h2>Roadmap</h2>
+    <table>
+      <tbody>
+        <tr><td>Fastify, Hono, Next.js adapters</td></tr>
+        <tr><td>Per-field encryption (encrypt only sensitive fields)</td></tr>
+        <tr><td>Redis session store reference implementation</td></tr>
+        <tr><td>Optional WASM-based crypto module (raises reverse-engineering cost further)</td></tr>
+        <tr><td>Streaming response support</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="container">
+    <span>envelop-letterbox · MIT license</span>
+    <span>
+      <a href="https://npmjs.com/package/envelop-letterbox" rel="noopener">npm ↗</a>
+      &nbsp;·&nbsp;
+      <a href="https://github.com/achugh787/envelope" rel="noopener">GitHub ↗</a>
+    </span>
+  </div>
+</footer>
+
+<script>
+  function copyInstall() {
+    const text = document.getElementById('install-cmd').textContent;
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = document.querySelector('.copy-btn');
+      btn.textContent = 'copied!';
+      setTimeout(() => btn.textContent = 'copy', 1500);
+    });
+  }
+</script>
+
+</body>
+</html>
