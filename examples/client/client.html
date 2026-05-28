@@ -29,16 +29,12 @@
   </p>
 
   <script type="module">
-    // In a real app:  import { createTransport } from '@akshit/envelope/client';
-    // For this static demo, we'd bundle. The example assumes you've run:
-    //   npm install && npm run build
-    // and are serving with a bundler. As a quick alternative, you can use a CDN
-    // version once published:
-    //   import { createTransport } from 'https://esm.sh/@akshit/envelope/client';
-    import { createTransport } from 'https://esm.sh/@akshit/envelope@0.1.0/client';
+    // The server exposes the built client bundle at /envelope-client.js.
+    // Open this page via http://localhost:3000 (not file://) so the import works.
+    import { createTransport } from '/envelope-client.js';
 
     const api = createTransport({
-      baseURL: 'http://localhost:3000',
+      baseURL: window.location.origin,  // same origin — no hardcoded port needed
       debug: true,
     });
 

@@ -6,4 +6,5 @@ dist/
 .env.local
 coverage/
 .vscode/
+.claude/
 .idea/

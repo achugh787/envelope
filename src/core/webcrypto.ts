@@ -11,7 +11,7 @@ function getCrypto(): Crypto {
     return globalThis.crypto;
   }
   throw new Error(
-    '@akshit/envelope: WebCrypto is not available in this environment. ' +
+    '@envelop/letterbox: WebCrypto is not available in this environment. ' +
     'Requires Node 18+ or a modern browser.'
   );
 }
