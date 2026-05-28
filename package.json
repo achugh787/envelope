@@ -1,6 +1,6 @@
 {
   "name": "@envelop/letterbox",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Wrap your API requests and responses in encrypted envelopes. Deters casual inspection and scraping. NOT end-to-end security against the end user.",
   "keywords": [
     "api",
