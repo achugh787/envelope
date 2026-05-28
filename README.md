@@ -1,4 +1,4 @@
-# @envelop/letterbox
+# envelop-letterbox
 
 Wrap your API requests and responses in encrypted envelopes. Replaces plaintext JSON in your network tab with opaque blobs.
 
@@ -38,7 +38,7 @@ If you need real protection against the end user, that data should not be on the
 ## Install
 
 ```bash
-npm install @envelop/letterbox
+npm install envelop-letterbox
 ```
 
 ## Quick start
@@ -47,7 +47,7 @@ npm install @envelop/letterbox
 
 ```js
 import express from 'express';
-import { createGuard } from '@envelop/letterbox/server/express';
+import { createGuard } from 'envelop-letterbox/server/express';
 
 const app = express();
 app.use(express.json());
@@ -63,7 +63,7 @@ app.listen(3000);
 ### Client (browser or Node)
 
 ```js
-import { createTransport } from '@envelop/letterbox/client';
+import { createTransport } from 'envelop-letterbox/client';
 
 const api = createTransport({ baseURL: 'http://localhost:3000' });
 
@@ -111,7 +111,7 @@ Returns: `{ get, post, put, patch, delete, request, rotateSession }`.
 The default in-memory store is fine for single-instance servers. For clusters, plug in Redis:
 
 ```js
-import { createGuard } from '@envelop/letterbox/server/express';
+import { createGuard } from 'envelop-letterbox/server/express';
 
 class RedisSessionStore {
   async get(sid)        { /* fetch + deserialize from Redis */ }

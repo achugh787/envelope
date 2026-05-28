@@ -1,9 +1,9 @@
 /**
- * Example server using @envelop/letterbox.
+ * Example server using envelop-letterbox.
  *
  * Run:
  *   npm install && npm run build   (in the repo root — builds the dist/ bundle)
- *   cd examples/server && npm link @envelop/letterbox && npm install
+ *   cd examples/server && npm link envelop-letterbox && npm install
  *   node server.js
  *
  * Then open http://localhost:3000 in a browser (client is served from here).
@@ -13,14 +13,14 @@ import express from 'express';
 import { createRequire } from 'module';
 import { dirname, resolve } from 'path';
 import { fileURLToPath } from 'url';
-import { createGuard } from '@envelop/letterbox/server/express';
+import { createGuard } from 'envelop-letterbox/server/express';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const require   = createRequire(import.meta.url);
 
 // Locate the built client bundle inside the installed package.
 // Works whether the package is npm-linked (local dev) or installed from npm.
-const pkgDistDir    = dirname(require.resolve('@envelop/letterbox'));   // → …/dist/index.cjs
+const pkgDistDir    = dirname(require.resolve('envelop-letterbox'));   // → …/dist/index.cjs
 const clientBundle  = resolve(pkgDistDir, '../dist/client/index.js'); // → …/dist/client/index.js
 const clientHtml    = resolve(__dirname, '../client/client.html');
 
